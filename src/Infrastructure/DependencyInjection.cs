@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Infrastructure.Persistence;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +17,7 @@ namespace Infrastructure
 
             services.AddScoped<IDbContext>(provider => provider.GetRequiredService<MovieAdvisorDbContext>());
             services.AddScoped<MovieAdvisorDbContextInitializer>();
+            services.AddScoped<IUserService, UserService>();
 
             return services;
         }
