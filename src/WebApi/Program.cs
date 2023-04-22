@@ -1,25 +1,35 @@
+using Application;
+using Infrastructure;
+using Infrastructure.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    builder.Services.AddApplicationServices()
+                    .AddInfrastructureServices();
+
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
 }
 
-app.UseHttpsRedirection();
+var app = builder.Build();
+{
 
-app.UseAuthorization();
+    using var scope = app.Services.CreateScope();
+    {
+        var initializer = scope.ServiceProvider.GetRequiredService<MovieAdvisorDbContextInitializer>();
+        await initializer.Seed();
+    }
 
-app.MapControllers();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
-app.Run();
+    app.UseHttpsRedirection();
+
+    app.MapControllers();
+
+    app.Run();
+}
