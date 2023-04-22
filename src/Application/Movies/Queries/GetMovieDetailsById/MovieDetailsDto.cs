@@ -17,9 +17,6 @@ public class MovieDetailsDto : IMapFrom<Movie>
     {
         profile.CreateMap<Movie, MovieDetailsDto>()
             .ForMember(dest => dest.AverageScore, opt => opt.MapFrom(src => !src.Ratings.Any() ? "Not rated" : src.Ratings.Average(r => r.Score).ToString("F1", new NumberFormatInfo { NumberDecimalSeparator = "." })));
-        // .ForMember(
-        //     dest => dest.AverageScore,
-        //     memOpt => memOpt.MapFrom(src => src.Ratings.Average(r => r.Score)));
     }
 }
 
