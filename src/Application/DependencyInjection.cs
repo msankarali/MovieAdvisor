@@ -2,13 +2,14 @@ using System.Reflection;
 using Application.Common.Behaviours;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

@@ -29,6 +29,34 @@ namespace Infrastructure
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailSettings>>().Value);
             services.AddTransient<IEmailService, SmtpEmailService>();
 
+            services.Configure<MessageBrokerSettings>(o => configuration.GetSection(MessageBrokerSettings.SettingsKey));
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<MessageBrokerSettings>>().Value);
+
+            services.AddMassTransit(busConfigurator =>
+            {
+                busConfigurator.SetKebabCaseEndpointNameFormatter();
+
+                busConfigurator.AddConsumer<MovieRecommendedEventConsumer>();
+
+                busConfigurator.UsingRabbitMq((context, configurator) =>
+                {
+                    MessageBrokerSettings settings = context.GetRequiredService<MessageBrokerSettings>();
+
+                    configurator.Host(new Uri(settings.Host), host =>
+                    {
+                        host.Username(settings.Username);
+                        host.Password(settings.Password);
+                    });
+
+                    configurator.ReceiveEndpoint("event", e =>
+                    {
+                        e.ConfigureConsumer<MovieRecommendedEventConsumer>(context);
+                    });
+                });
+            });
+
+            services.AddTransient<IEventBus, EventBus>();
+
             return services;
         }
     }
