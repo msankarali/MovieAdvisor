@@ -1,14 +1,6 @@
-using System.Diagnostics;
-using System.Text.Json;
 using Application;
-using Application.Common.Interfaces;
-using Application.Common.Models.Mail;
-using Application.Movies.Commands.RecommendMovie;
 using Infrastructure;
-using Infrastructure.MessageBroker;
 using Infrastructure.Persistence;
-using MassTransit;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 {
