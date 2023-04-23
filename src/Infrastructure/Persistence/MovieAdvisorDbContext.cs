@@ -5,15 +5,19 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Domain.Entities;
+using Infrastructure.Common;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence
 {
     public class MovieAdvisorDbContext : DbContext, IDbContext
     {
-        public MovieAdvisorDbContext(DbContextOptions<MovieAdvisorDbContext> options) : base(options)
-        {
+        private readonly IMediator _mediator;
 
+        public MovieAdvisorDbContext(DbContextOptions<MovieAdvisorDbContext> options, IMediator mediator) : base(options)
+        {
+            _mediator = mediator;
         }
 
         public DbSet<Movie> Movies { get; set; }
@@ -27,8 +31,10 @@ namespace Infrastructure.Persistence
             base.OnModelCreating(modelBuilder);
         }
 
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            await _mediator.DispatchDomainEvents(this);
+
             return await base.SaveChangesAsync(cancellationToken);
         }
     }
