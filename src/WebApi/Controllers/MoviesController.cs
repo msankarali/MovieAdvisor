@@ -23,9 +23,10 @@ public class MoviesController : BaseController
     }
 
     [HttpPost("{id}/recommend")]
-    public async Task<ActionResult<Result>> Post([FromRoute] int id, [FromQuery] string email)
+    public async Task<ActionResult<Result>> Post([FromRoute] int id, [FromBody] RecommendMovieCommand command)
     {
-        Result result = await Mediator.Send(new RecommendMovieCommand { MovieId = id, Email = email });
+        command.MovieId = id;
+        Result result = await Mediator.Send(command);
         return result;
     }
 }

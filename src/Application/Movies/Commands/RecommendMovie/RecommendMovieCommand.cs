@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Domain.Entities;
@@ -8,7 +9,8 @@ namespace Application.Movies.Commands.RecommendMovie;
 
 public class RecommendMovieCommand : IRequest<Result>
 {
-    public int MovieId { get; init; }
+    [JsonIgnore]
+    public int MovieId { get; set; }
     public string Email { get; init; }
 
     public class RecommendMovieCommandHandler : IRequestHandler<RecommendMovieCommand, Result>
