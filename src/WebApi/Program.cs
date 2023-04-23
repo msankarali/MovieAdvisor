@@ -1,11 +1,35 @@
 using Application;
+using Application.Common.Interfaces;
 using Infrastructure;
+using Infrastructure.MessageBroker;
 using Infrastructure.Persistence;
+using MassTransit;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Services.AddApplicationServices()
                     .AddInfrastructureServices();
+
+    builder.Services.Configure<MessageBrokerSettings>(builder.Configuration.GetSection(MessageBrokerSettings.SettingsKey));
+    builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<MessageBrokerSettings>>().Value);
+    builder.Services.AddTransient<IEventBus, EventBus>();
+
+    builder.Services.AddMassTransit(busConfigurator =>
+    {
+        busConfigurator.SetKebabCaseEndpointNameFormatter();
+
+        busConfigurator.UsingRabbitMq((context, configurator) =>
+        {
+            MessageBrokerSettings settings = context.GetRequiredService<MessageBrokerSettings>();
+
+            configurator.Host(new Uri(settings.Host), host =>
+            {
+                host.Username(settings.Username);
+                host.Password(settings.Password);
+            });
+        });
+    });
 
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
