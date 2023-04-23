@@ -4,6 +4,10 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ContainerImageName>movieadvisor-webapi</ContainerImageName>
+    <PublishProfile>DefaultContainer</PublishProfile>
+    <ContainerImageTags>1.0.0;latest</ContainerImageTags>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
