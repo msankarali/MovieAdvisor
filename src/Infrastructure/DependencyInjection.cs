@@ -25,11 +25,11 @@ namespace Infrastructure
             services.AddScoped<MovieAdvisorDbContextInitializer>();
             services.AddScoped<IUserService, UserService>();
 
-            services.Configure<EmailSettings>(configuration.GetSection(nameof(MessageBrokerSettings)));
+            services.Configure<EmailSettings>(configuration.GetSection(nameof(EmailSettings)));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailSettings>>().Value);
             services.AddTransient<IEmailService, SmtpEmailService>();
 
-            services.Configure<MessageBrokerSettings>(o => configuration.GetSection(MessageBrokerSettings.SettingsKey));
+            services.Configure<MessageBrokerSettings>(configuration.GetSection(MessageBrokerSettings.SettingsKey));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<MessageBrokerSettings>>().Value);
 
             services.AddMassTransit(busConfigurator =>
