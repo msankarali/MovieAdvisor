@@ -1,0 +1,30 @@
+version: '3.4'
+services:
+  web:
+    image: movieadvisor-webapi:1.0.0
+    container_name: webapi-container
+    ports:
+      - "8080:80"
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - rabbitmq
+    environment:
+      - MessageBroker__Host=rabbitmq://rabbitmq
+      - MessageBroker__Username=guest
+      - MessageBroker__Password=guest
+    networks:
+      - my-network
+
+  rabbitmq:
+    image: rabbitmq:3.8.17-management-alpine
+    container_name: rabbitmq-container
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
