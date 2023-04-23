@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Common.Models;
+using Application.Common.Models.Cache;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.Entities;
@@ -18,23 +19,29 @@ public class GetPagedMoviesQuery : IRequest<PagedList<MovieDto>>
     {
         private readonly IDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public GetPagedMoviesQueryHandler(IDbContext dbContext, IMapper mapper)
+        public GetPagedMoviesQueryHandler(IDbContext dbContext, IMapper mapper, ICacheService cacheService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _cacheService = cacheService;
         }
 
         public async Task<PagedList<MovieDto>> Handle(GetPagedMoviesQuery request, CancellationToken cancellationToken)
         {
-            var movies = await _dbContext.Set<Movie>().AsNoTracking()
-                .ProjectTo<MovieDto>(_mapper.ConfigurationProvider)
-                .PagedListAsync<MovieDto>(
-                    pageNumber: request.PageNumber,
-                    pageSize: request.PageSize
-                );
+            string cachePattern = $"{CachePatterns.Movies.PagedMovies.Pattern}|pageNumber:{request.PageNumber}|pageSize:{request.PageSize}";
+            // _cacheService.RemoveByPattern(CachePatterns.Movies.PagedMovies.Pattern);
 
-            return movies;
+            return await _cacheService.GetOrAddAsync<PagedList<MovieDto>>(
+                key: cachePattern,
+                action: async () =>
+                    await _dbContext.Set<Movie>().AsNoTracking()
+                        .ProjectTo<MovieDto>(_mapper.ConfigurationProvider)
+                        .PagedListAsync<MovieDto>(
+                            pageNumber: request.PageNumber,
+                            pageSize: request.PageSize
+                        ));
         }
     }
 }

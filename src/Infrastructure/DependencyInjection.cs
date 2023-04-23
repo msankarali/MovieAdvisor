@@ -27,10 +27,13 @@ namespace Infrastructure
 
             services.Configure<EmailSettings>(configuration.GetSection(nameof(EmailSettings)));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailSettings>>().Value);
-            services.AddTransient<IEmailService, SmtpEmailService>();
+            services.AddSingleton<IEmailService, SmtpEmailService>();
 
             services.Configure<MessageBrokerSettings>(configuration.GetSection(MessageBrokerSettings.SettingsKey));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<MessageBrokerSettings>>().Value);
+
+
+            services.AddSingleton<ICacheService, RedisCacheService>();
 
             services.AddMassTransit(busConfigurator =>
             {
