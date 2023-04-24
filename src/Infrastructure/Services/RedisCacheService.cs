@@ -2,6 +2,7 @@ using Application.Common.Interfaces;
 using Application.Common.Models.Cache;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services;
@@ -24,10 +25,12 @@ public class RedisCacheService : ICacheService
         var result = await _database.StringGetAsync(key);
         if (result.IsNull)
         {
-            result = JsonConvert.SerializeObject(await action());
-            await SetValueAsync(key, result, duration ?? TimeSpan.FromMinutes(30));
+            var data = await action();
+            result = JsonConvert.SerializeObject(data);
+            await SetValueAsync<T>(key, data, duration ?? TimeSpan.FromMinutes(1));
         }
-        return JsonConvert.DeserializeObject<T>(result);
+        
+        return JsonConvert.DeserializeObject<T>(result.ToString());
     }
 
     public async Task<string> GetValueAsync(string key)
@@ -82,9 +85,9 @@ public class RedisCacheService : ICacheService
 
     public async Task SetValueAsync<T>(string key, T value, TimeSpan? duration = null)
     {
-        var result = JsonConvert.SerializeObject(value);
-        await SetValueAsync(key, result, duration ?? TimeSpan.FromMinutes(30));
+        await SetValueAsync<T>(key, value, duration ?? TimeSpan.FromMinutes(30));
     }
+
     public bool TryGet<T>(string key, out T value) where T : class
     {
         var result = _database.StringGet(key);
