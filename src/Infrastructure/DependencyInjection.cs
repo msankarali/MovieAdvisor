@@ -1,9 +1,12 @@
 using Application.Common.Interfaces;
 using Application.Common.Models.Mail;
 using Application.Movies.Commands.RecommendMovie;
+using Hangfire;
+using Infrastructure.FilmDataCollectorIntegrationService;
 using Infrastructure.MessageBroker;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
+using Infrastructure.Services.Jobs;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -32,8 +35,16 @@ namespace Infrastructure
             services.Configure<MessageBrokerSettings>(configuration.GetSection(MessageBrokerSettings.SettingsKey));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<MessageBrokerSettings>>().Value);
 
-
             services.AddSingleton<ICacheService, RedisCacheService>();
+
+            services.AddScoped<IMovieDataCollectorIntegrationService, TheMovieDbDataCollectorIntegrationService>();
+
+            services.AddHangfire(config => config.UseSqlServerStorage(configuration.GetConnectionString("Hangfire")));
+            services.AddHangfireServer();
+
+            services.AddTransient<IJobSchedulerService, HangfireJobSchedulerService>();
+            var jobSchedulerService = services.BuildServiceProvider().GetRequiredService<IJobSchedulerService>();
+            jobSchedulerService.ScheduleRecurringJob<TheMovieDBJob>("0 0-23 * * *");
 
             services.AddMassTransit(busConfigurator =>
             {

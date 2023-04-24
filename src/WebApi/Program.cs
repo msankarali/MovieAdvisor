@@ -1,4 +1,5 @@
 using Application;
+using Hangfire;
 using Infrastructure;
 using Infrastructure.Persistence;
 
@@ -25,6 +26,7 @@ var app = builder.Build();
     {
         app.UseSwagger();
         app.UseSwaggerUI();
+        app.UseHangfireDashboard();
     }
 
     app.UseHttpsRedirection();
