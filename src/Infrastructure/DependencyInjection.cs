@@ -42,9 +42,18 @@ namespace Infrastructure
             services.AddHangfire(config => config.UseSqlServerStorage(configuration.GetConnectionString("Hangfire")));
             services.AddHangfireServer();
 
-            services.AddTransient<IJobSchedulerService, HangfireJobSchedulerService>();
+            services.AddSingleton<IJobSchedulerService, HangfireJobSchedulerService>();
             var jobSchedulerService = services.BuildServiceProvider().GetRequiredService<IJobSchedulerService>();
-            jobSchedulerService.ScheduleRecurringJob<TheMovieDBJob>("0 0-23 * * *");
+
+            jobSchedulerService.ScheduleRecurringJob<TheMovieDBScheduledJob>(x => x.Execute(), "* * * * *");
+
+            jobSchedulerService.ScheduleContinuationJob<TheMovieDBScheduledJob, TheMovieDBContinuationJob>(
+                func: x => x.Execute(),
+                continuationFunc: x => x.ExecuteContinuation());
+
+            jobSchedulerService.ScheduleDelayedJob<TheMovieDBDelayedJob>(
+                func: x => x.Trigger(),
+                delay: TimeSpan.FromSeconds(10));
 
             services.AddMassTransit(busConfigurator =>
             {

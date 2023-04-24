@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Application.Common.Interfaces;
 using Hangfire;
 
@@ -12,24 +13,25 @@ public class HangfireJobSchedulerService : IJobSchedulerService
         _backgroundJobClient = backgroundJobClient;
     }
 
-    public void ScheduleContinuationJob<TJob>()
+    public void ScheduleContinuationJob<TJob, TContinuationJob>(Expression<Action<TJob>> func,
+                                                                Expression<Action<TContinuationJob>> continuationFunc)
     {
-        string jobId = _backgroundJobClient.Enqueue<IJob>(job => job.Execute());
-        _backgroundJobClient.ContinueJobWith<IJob>(jobId, job => job.Execute());
+        string jobId = _backgroundJobClient.Enqueue<TJob>(func);
+        _backgroundJobClient.ContinueJobWith<TContinuationJob>(jobId, continuationFunc);
     }
 
-    public void ScheduleDelayedJob<TJob>(TimeSpan delay)
+    public void ScheduleDelayedJob<TJob>(Expression<Action<TJob>> func, TimeSpan delay)
     {
-        _backgroundJobClient.Schedule<IJob>(job => job.Execute(), delay);
+        _backgroundJobClient.Schedule<TJob>(func, delay);
     }
 
-    public void ScheduleFireAndForgetJob<TJob>()
+    public void ScheduleFireAndForgetJob<TJob>(Expression<Action<TJob>> func)
     {
-        _backgroundJobClient.Enqueue<IJob>(job => job.Execute());
+        _backgroundJobClient.Enqueue<TJob>(func);
     }
 
-    public void ScheduleRecurringJob<TJob>(string cronExpression)
+    public void ScheduleRecurringJob<TJob>(Expression<Action<TJob>> func, string cronExpression)
     {
-        RecurringJob.AddOrUpdate<IJob>(job => job.Execute(), cronExpression);
+        RecurringJob.AddOrUpdate(func, cronExpression);
     }
 }
