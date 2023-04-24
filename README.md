@@ -66,6 +66,8 @@ This will start the application and listen on `https://localhost:5270`.
     - [x] Add note and rating to a selected movie
         - [x] Remove cache using selected movie as strategy
     - [x] Send movie recommendation to a given email address using RabbitMQ
+    - [x] Save movies from TheMovieDB
+        - [x] Remove all cached paged movies by pattern 
 - [x] themoviedb.org API data collector in an hourly scheduled job
 - [x] Redis for caching
 - [x] RabbitMQ for message queuing
