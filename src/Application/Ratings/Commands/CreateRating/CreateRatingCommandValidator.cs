@@ -32,12 +32,6 @@ public class CreateRatingCommandValidator : AbstractValidator<CreateRatingComman
             bool exists = await _dbContext.Set<Rating>()
                                           .Where(m => m.MovieId == movieId && m.UserId == userId)
                                           .AnyAsync(cancellationToken);
-            var dexists = await _dbContext.Set<Rating>()
-                                          .Where(m => m.MovieId == movieId && m.UserId == userId).ToListAsync();
-
-                                          
-            var alll = await _dbContext.Set<Rating>().ToListAsync();
-
             return !exists;
         }).WithMessage("You have already rated for this movie!");
 
