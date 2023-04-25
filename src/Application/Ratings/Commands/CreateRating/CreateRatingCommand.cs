@@ -1,11 +1,14 @@
 using Application.Common.Interfaces;
 using Application.Common.Models.Cache;
+using Application.Common.Security;
 using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Ratings.Commands.CreateRating;
 
+
+[Authorized]
 public class CreateRatingCommand : IRequest<Unit>
 {
     public int MovieId { get; init; }
@@ -27,7 +30,7 @@ public class CreateRatingCommand : IRequest<Unit>
 
         public async Task<Unit> Handle(CreateRatingCommand request, CancellationToken cancellationToken)
         {
-            int userId = await _userService.GetUserId();
+            int userId = await _userService.GetUserIdAsync();
 
             var ratingToAdd = Rating.CreateRating(
                 movieId: request.MovieId,

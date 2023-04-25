@@ -18,22 +18,23 @@ public class TheMovieDbDataCollectorIntegrationService : IMovieDataCollectorInte
     public async Task<List<Movie>> Collect()
     {
         using var client = new HttpClient();
-        
+
         var data = await client.GetFromJsonAsync<TMDBResponseModel>($"https://api.themoviedb.org/3/movie/latest?api_key={_theMovieDbSettings.APIKey_v3}&language=en-US");
 
         var movieList = new List<Movie>();
-        for (int i = 0; i < data?.Results.Count; i++)
-        {
-            var movieFromTMDB = data.Results[i];
-            var film = new Movie
+        if (data != null)
+            for (int i = 0; i < data?.Results?.Count; i++)
             {
-                Title = movieFromTMDB.Title,
-                Description = movieFromTMDB.Overview,
-                ReleaseDate = DateTime.Parse(movieFromTMDB.ReleaseDate)
-            };
+                var movieFromTMDB = data.Results[i];
+                var film = new Movie
+                {
+                    Title = movieFromTMDB.Title,
+                    Description = movieFromTMDB.Overview,
+                    ReleaseDate = DateTime.Parse(movieFromTMDB.ReleaseDate)
+                };
 
-            movieList.Add(film);
-        }
+                movieList.Add(film);
+            }
 
         return movieList;
     }

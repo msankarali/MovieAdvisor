@@ -27,7 +27,7 @@ public class CreateRatingCommandValidator : AbstractValidator<CreateRatingComman
 
         RuleFor(r => r.MovieId).MustAsync(async (movieId, cancellationToken) =>
         {
-            int userId = await _userService.GetUserId();
+            int userId = await _userService.GetUserIdAsync();
 
             bool exists = await _dbContext.Set<Rating>()
                                           .Where(m => m.MovieId == movieId && m.UserId == userId)

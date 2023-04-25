@@ -1,22 +1,19 @@
-using System.Data;
 using Application.Common.Interfaces;
 using Application.Common.Models.Mail;
-using Application.Common.Models.User;
+using Application.Common.Security;
 using Application.Movies.Commands.RecommendMovie;
 using Hangfire;
 using Infrastructure.FilmDataCollectorIntegrationService;
 using Infrastructure.MessageBroker;
 using Infrastructure.Persistence;
+using Infrastructure.Security;
 using Infrastructure.Services;
 using Infrastructure.Services.Jobs;
 using MassTransit;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace Infrastructure
@@ -83,28 +80,6 @@ namespace Infrastructure
                     });
                 });
             });
-            
-            services.AddAuthentication()
-                    .AddJwtBearer()
-                    .AddOpenIdConnect(options =>
-                    {
-                        var auth0Settings = configuration.GetSection(nameof(Auth0Settings)).Get<Auth0Settings>();
-
-                        options.Authority = $"https://{auth0Settings.Domain}";
-                        options.ClientId = auth0Settings.ClientId;
-                        options.ClientSecret = auth0Settings.ClientSecret;
-                        options.ResponseType = auth0Settings.ResponseType;
-                        options.CallbackPath = new PathString(auth0Settings.CallbackPath);
-                        options.SignedOutCallbackPath = new PathString(auth0Settings.SignedOutCallbackPath);
-                        options.RemoteSignOutPath = new PathString(auth0Settings.RemoteSignOutPath);
-                        options.SaveTokens = true;
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            NameClaimType = "name",
-                            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                        };
-                    });
-
 
             services.AddSwaggerGen(c =>
             {
@@ -118,27 +93,11 @@ namespace Infrastructure
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer"
                 });
-
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] { }
-                    }
-                });
             });
 
+            services.AddSingleton<IJwtUtils, JwtUtils>();
             services.AddScoped<IUserService, UserService>();
-
-            services.AddAuthorization();
-
+            
             services.AddTransient<IEventBus, EventBus>();
 
             services.AddHttpContextAccessor();

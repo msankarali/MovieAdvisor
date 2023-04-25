@@ -1,73 +1,68 @@
-using System.Security.Authentication;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using Application.Common.Models.User;
-using Microsoft.AspNetCore.Authentication;
+using Application.Common.Security;
+using Domain.Entities;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
 public class UserService : IUserService
 {
-    private readonly Auth0Settings _auth0Settings;
+    private readonly IDbContext _dbContext;
+    private readonly IJwtUtils _jwtUtils;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public UserService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+    public UserService(IDbContext dbContext, IJwtUtils jwtUtils, IHttpContextAccessor httpContextAccessor)
     {
-        _auth0Settings = configuration.GetSection(nameof(Auth0Settings)).Get<Auth0Settings>();
+        _dbContext = dbContext;
+        _jwtUtils = jwtUtils;
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<string> AuthenticateAsync(string username, string password)
+    public async Task<string> AuthenticateAsync(string email, string password)
     {
-        var client = new HttpClient();
-
-        var request = new HttpRequestMessage(HttpMethod.Post, $"https://{_auth0Settings.Domain}/oauth/token")
+        var user = await _dbContext.Set<User>().Where(u => u.Email == email).FirstOrDefaultAsync();
+        if (user is null)
         {
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                { "grant_type", "http://auth0.com/oauth/grant-type/password-realm" },
-                { "client_id", _auth0Settings.ClientId },
-                { "client_secret", _auth0Settings.ClientSecret },
-                { "username", username },
-                { "password", password },
-                { "realm", "Username-Password-Authentication" },
-            })
-        };
-
-        var response = await client.SendAsync(request);
-        var responseContent = await response.Content.ReadAsStringAsync();
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new AuthenticationException(responseContent);
+            throw new NotFoundException("Wrong email or password!");
         }
 
-        var token = JsonConvert.DeserializeObject<Auth0TokenResponse>(responseContent);
+        if (!HashingUtils.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+        {
+            throw new NotFoundException("Wrong email or password!");
+        }
 
-        // await _httpContextAccessor.HttpContext.SignInAsync();
-
-        return token.AccessToken;
+        return _jwtUtils.GenerateJwtToken(user);
     }
 
-    public Task<bool> CreateUserAsync(string username, string password)
+    public async Task<string> CreateUserAsync(string email, string password, string firstName, string lastName)
     {
-        throw new NotImplementedException();
+        var isUserRegistered = _dbContext.Set<User>().Where(u => u.Email == email).Any();
+        if (isUserRegistered)
+        {
+            throw new Exception("User already exists!");
+        }
+
+        HashingUtils.CreatePasswordHash(password, out byte[] passwordHash, out var passwordSalt);
+
+        await _dbContext.Set<User>().AddAsync(new User
+        {
+            Email = email,
+            FirstName = firstName,
+            LastName = lastName,
+            PasswordHash = passwordHash,
+            PasswordSalt = passwordSalt
+        });
+        await _dbContext.SaveChangesAsync(default);
+
+        return await AuthenticateAsync(email, password);
     }
 
-    public Task<int> GetUserId()
+    public Task<int> GetUserIdAsync()
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<string> RefreshTokenAsync(string refreshToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task RevokeTokenAsync(string token, string clientId)
-    {
-        throw new NotImplementedException();
+        var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+        var userId = _jwtUtils.ValidateJwtToken(token);
+        return Task.FromResult(userId);
     }
 }
