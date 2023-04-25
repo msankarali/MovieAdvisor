@@ -54,7 +54,7 @@ To run the application using .NET 7, follow these steps:
 This will start the application and listen on `https://localhost:5270`.
 ## Roadmap
 
-- [ ] Create API for movie list, requiring authentication with Auth0 or JWT login method
+- [x] Create API for movie list, requiring authentication with Auth0 or JWT login method
     - [x] Auth operations
         - [x] Register
         - [x] Login
