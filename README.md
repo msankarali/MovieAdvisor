@@ -20,7 +20,7 @@ To run the application with Docker Compose, follow these steps:
 1. Install Docker Compose if you haven't already by running the following command:
 
     ```bash
-    sudo apt install docker-compose
+    install docker-compose
     ```
 
 2. Navigate to the project's root directory and run the following command to start the application:
@@ -55,9 +55,9 @@ This will start the application and listen on `https://localhost:5270`.
 ## Roadmap
 
 - [ ] Create API for movie list, requiring authentication with Auth0 or JWT login method
-    - [ ] Auth operations
-        - [ ] Register
-        - [ ] Login
+    - [x] Auth operations
+        - [x] Register
+        - [x] Login
     - [x] Get paginated list of all movies
         - [x] Cache paged data in Redis using page size and number as strategy for 7 days
     - [x] Get movie details, including average rating, user rating, and user notes
