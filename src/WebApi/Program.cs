@@ -2,6 +2,7 @@ using Application;
 using Hangfire;
 using Infrastructure;
 using Infrastructure.Persistence;
+using WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -10,7 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
 }
 
 var app = builder.Build();
@@ -21,6 +21,8 @@ var app = builder.Build();
         var initializer = scope.ServiceProvider.GetRequiredService<MovieAdvisorDbContextInitializer>();
         await initializer.Seed();
     }
+
+    app.UseMiddleware<ErrorHandlerMiddleware>();
 
     if (app.Environment.IsDevelopment())
     {

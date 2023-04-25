@@ -43,7 +43,8 @@ namespace Infrastructure.Persistence
                         FirstName = "Muharrem Servet",
                         LastName = "Ankaralı",
                         Email = "mservetankarali@gmail.com",
-                        PasswordHash = "dy7*hsa1g4t2"
+                        PasswordHash = new byte[] {1,2,3,4,5},
+                        PasswordSalt = new byte[] {1,2,3,4,5}
                     },
                     new User
                     {
@@ -51,7 +52,8 @@ namespace Infrastructure.Persistence
                         FirstName = "Ali",
                         LastName = "Yıldırım",
                         Email = "ali.yildirim@example.com",
-                        PasswordHash = "dy7*hsa1g4t2"
+                        PasswordHash = new byte[] {1,2,3,4,5},
+                        PasswordSalt = new byte[] {1,2,3,4,5}
                     },
                     new User
                     {
@@ -59,7 +61,8 @@ namespace Infrastructure.Persistence
                         FirstName = "Gizem",
                         LastName = "Tekin",
                         Email = "gizem.tekin@example.com",
-                        PasswordHash = "8p9e23bk6d7"
+                        PasswordHash = new byte[] {1,2,3,4,5},
+                        PasswordSalt = new byte[] {1,2,3,4,5}
                     },
                     new User
                     {
@@ -67,7 +70,8 @@ namespace Infrastructure.Persistence
                         FirstName = "Burak",
                         LastName = "Aydın",
                         Email = "burak.aydin@example.com",
-                        PasswordHash = "43jnk9fm1c0"
+                        PasswordHash = new byte[] {1,2,3,4,5},
+                        PasswordSalt = new byte[] {1,2,3,4,5}
                     },
                     new User
                     {
@@ -75,7 +79,8 @@ namespace Infrastructure.Persistence
                         FirstName = "Esra",
                         LastName = "Çalışkan",
                         Email = "esra.caliskan@example.com",
-                        PasswordHash = "06shg53ftu7"
+                        PasswordHash = new byte[] {1,2,3,4,5},
+                        PasswordSalt = new byte[] {1,2,3,4,5}
                     }
                 });
 
