@@ -38,17 +38,16 @@ To run the application using .NET 7, follow these steps:
 
 1. Install the [.NET Core SDK](https://dotnet.microsoft.com/download/dotnet/7.0) if you haven't already.
 
-2. Navigate to the project's root directory and run the following command to build the application:
+2. Navigate to the project's root directory and run the following command to install dependencies and build the application:
 
     ```bash
+    dotnet restore
     dotnet build
     ```
 
 3. Run the following command to start the application:
 
     ```bash
-    dotnet restore
-    dotnet build
     dotnet run
     ```
 
