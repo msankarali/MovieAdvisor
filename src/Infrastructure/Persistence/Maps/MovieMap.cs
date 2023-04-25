@@ -14,6 +14,6 @@ public class MovieMap : IEntityTypeConfiguration<Movie>
         builder.Property(x => x.Description).IsRequired().HasMaxLength(4000);
         builder.Property(x => x.Title).IsRequired().HasMaxLength(500);
 
-        builder.HasMany(x => x.Ratings).WithMany(x => x.Movies);
+        builder.HasMany(x => x.Ratings).WithOne(x => x.Movie).HasForeignKey(x=>x.MovieId);
     }
 }

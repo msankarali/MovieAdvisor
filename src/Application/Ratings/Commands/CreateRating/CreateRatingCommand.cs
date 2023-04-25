@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Application.Common.Jobs;
 using Application.Common.Models.Cache;
 using Application.Common.Security;
 using Domain.Entities;
@@ -20,12 +21,14 @@ public class CreateRatingCommand : IRequest<Unit>
         private readonly IDbContext _dbContext;
         private readonly IUserService _userService;
         private readonly ICacheService _cacheService;
+        private readonly IJobSchedulerService _jobSchedulerService;
 
-        public CreateRatingCommandHandler(IDbContext dbContext, IUserService userService, ICacheService cacheService)
+        public CreateRatingCommandHandler(IDbContext dbContext, IUserService userService, ICacheService cacheService, IJobSchedulerService jobSchedulerService)
         {
             _dbContext = dbContext;
             _userService = userService;
             _cacheService = cacheService;
+            _jobSchedulerService = jobSchedulerService;
         }
 
         public async Task<Unit> Handle(CreateRatingCommand request, CancellationToken cancellationToken)
@@ -40,6 +43,8 @@ public class CreateRatingCommand : IRequest<Unit>
             );
 
             await _dbContext.Set<Rating>().AddAsync(ratingToAdd);
+
+            _jobSchedulerService.ScheduleFireAndForgetJob<ITheMovieDBContinuationJob>(x => x.Trigger());
 
             if (await _dbContext.SaveChangesAsync(cancellationToken) > 0)
             {

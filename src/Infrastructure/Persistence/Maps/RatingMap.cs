@@ -13,6 +13,6 @@ public class RatingMap : IEntityTypeConfiguration<Rating>
         builder.Property(x => x.Comment).HasMaxLength(2000);
         builder.Property(x => x.Score).IsRequired();
 
-        builder.HasMany(x => x.Movies).WithMany(x => x.Ratings);
+        builder.HasOne(x => x.Movie).WithMany(x => x.Ratings).HasForeignKey(x => x.MovieId);
     }
 }

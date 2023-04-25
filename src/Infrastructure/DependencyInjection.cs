@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Application.Common.Jobs;
 using Application.Common.Models.Mail;
 using Application.Common.Security;
 using Application.Movies.Commands.RecommendMovie;
@@ -47,6 +48,8 @@ namespace Infrastructure
 
             services.AddSingleton<IJobSchedulerService, HangfireJobSchedulerService>();
             var jobSchedulerService = services.BuildServiceProvider().GetRequiredService<IJobSchedulerService>();
+
+            services.AddTransient<ITheMovieDBContinuationJob, TheMovieDBDelayedJob>();
 
             jobSchedulerService.ScheduleRecurringJob<TheMovieDBScheduledJob>(x => x.Execute(), "* * * * *");
 
@@ -97,7 +100,7 @@ namespace Infrastructure
 
             services.AddSingleton<IJwtUtils, JwtUtils>();
             services.AddScoped<IUserService, UserService>();
-            
+
             services.AddTransient<IEventBus, EventBus>();
 
             services.AddHttpContextAccessor();

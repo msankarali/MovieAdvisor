@@ -18,7 +18,7 @@ public class Rating : BaseEntity
     public string? Comment { get; set; }
 
     public virtual User User { get; set; }
-    public virtual List<Movie> Movies { get; set; }
+    public virtual Movie Movie { get; set; }
 
     public static Rating CreateRating(int movieId, int userId, int score, string? comment)
     {
