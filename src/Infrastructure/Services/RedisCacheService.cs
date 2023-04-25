@@ -38,11 +38,6 @@ public class RedisCacheService : ICacheService
         return await _database.StringGetAsync(key);
     }
 
-    public async Task SetValueAsync(string key, string value, TimeSpan? duration)
-    {
-        await _database.StringSetAsync(key, value, duration ?? TimeSpan.FromMinutes(30));
-    }
-
     public T GetOrAdd<T>(string key, Func<T> action, TimeSpan? duration) where T : class
     {
         var result = _database.StringGet(key);
@@ -85,7 +80,13 @@ public class RedisCacheService : ICacheService
 
     public async Task SetValueAsync<T>(string key, T value, TimeSpan? duration = null)
     {
-        await SetValueAsync<T>(key, value, duration ?? TimeSpan.FromMinutes(30));
+        var data = JsonConvert.SerializeObject(value);
+        await _database.StringSetAsync(key, data, duration ?? TimeSpan.FromMinutes(30));
+    }
+
+    public async Task SetValueAsync(string key, string value, TimeSpan? duration = null)
+    {
+        await _database.StringSetAsync(key, value, duration ?? TimeSpan.FromMinutes(30));
     }
 
     public bool TryGet<T>(string key, out T value) where T : class
