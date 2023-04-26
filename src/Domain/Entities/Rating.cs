@@ -14,7 +14,21 @@ public class Rating : BaseEntity
     public int Id { get; set; }
     public int MovieId { get; set; }
     public int UserId { get; set; }
-    public int Score { get; set; }
+
+    private int _score;
+    public int Score
+    {
+        get { return _score; }
+        set
+        {
+            if (value < 0 || value > 10)
+            {
+                throw new RatingOutOfBoundsException();
+            }
+            _score = value;
+        }
+    }
+
     public string? Comment { get; set; }
 
     public virtual User User { get; set; }
