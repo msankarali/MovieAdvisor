@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Application.Common.Models.MovieDataCollectorIntegration;
 
-public class Result
+public class TMDBResponseModelResult
 {
     [JsonPropertyName("adult")]
     public bool Adult { get; set; }
@@ -53,7 +53,7 @@ public class TMDBResponseModel
     public int Page { get; set; }
 
     [JsonPropertyName("results")]
-    public List<Result> Results { get; set; }
+    public List<TMDBResponseModelResult> Results { get; set; }
 
     [JsonPropertyName("total_pages")]
     public int TotalPages { get; set; }
