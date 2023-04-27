@@ -1,7 +1,7 @@
 namespace Application.Common.Models;
 
 public class DataResult<TData> : Result
-    where TData : class, new()
+    where TData : class
 {
     private DataResult(ResultTypes resultType) : base(resultType) { }
     private DataResult(ResultTypes resultType, TData data) : this(resultType) => Data = data;

@@ -10,12 +10,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Movies.Queries.GetPagedMovies;
 
-public class GetPagedMoviesQuery : IRequest<PagedList<MovieDto>>
+public class GetPagedMoviesQuery : IRequest<DataResult<PagedList<MovieDto>>>
 {
     public int PageNumber { get; init; } = 1;
     public int PageSize { get; init; } = 10;
 
-    public class GetPagedMoviesQueryHandler : IRequestHandler<GetPagedMoviesQuery, PagedList<MovieDto>>
+    public class GetPagedMoviesQueryHandler : IRequestHandler<GetPagedMoviesQuery, DataResult<PagedList<MovieDto>>>
     {
         private readonly IDbContext _dbContext;
         private readonly IMapper _mapper;
@@ -28,12 +28,12 @@ public class GetPagedMoviesQuery : IRequest<PagedList<MovieDto>>
             _cacheService = cacheService;
         }
 
-        public async Task<PagedList<MovieDto>> Handle(GetPagedMoviesQuery request, CancellationToken cancellationToken)
+        public async Task<DataResult<PagedList<MovieDto>>> Handle(GetPagedMoviesQuery request, CancellationToken cancellationToken)
         {
             string cachePattern = $"{CachePatterns.Movies.PagedMovies.Pattern}|pageNumber:{request.PageNumber}|pageSize:{request.PageSize}";
             // _cacheService.RemoveByPattern(CachePatterns.Movies.PagedMovies.Pattern);
 
-            return await _cacheService.GetOrAddAsync<PagedList<MovieDto>>(
+            return DataResult<PagedList<MovieDto>>.Success(await _cacheService.GetOrAddAsync<PagedList<MovieDto>>(
                 key: cachePattern,
                 action: async () =>
                     await _dbContext.Set<Movie>().AsNoTracking()
@@ -41,7 +41,7 @@ public class GetPagedMoviesQuery : IRequest<PagedList<MovieDto>>
                         .PagedListAsync<MovieDto>(
                             pageNumber: request.PageNumber,
                             pageSize: request.PageSize
-                        ));
+                        )));
         }
     }
 }

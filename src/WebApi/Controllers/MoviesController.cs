@@ -9,18 +9,10 @@ namespace WebApi.Controllers;
 public class MoviesController : BaseController
 {
     [HttpGet]
-    public async Task<ActionResult<PagedList<MovieDto>>> Get([FromQuery] GetPagedMoviesQuery query)
-    {
-        PagedList<MovieDto> result = await Mediator.Send(query);
-        return result;
-    }
+    public async Task<ActionResult<DataResult<PagedList<MovieDto>>>> Get([FromQuery] GetPagedMoviesQuery query) => await Mediator.Send(query);
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<MovieDetailsDto>> Get([FromRoute] int id)
-    {
-        MovieDetailsDto result = await Mediator.Send(new GetMovieDetailsByIdQuery { MovieId = id });
-        return result;
-    }
+    public async Task<ActionResult<DataResult<MovieDetailsDto>>> Get([FromRoute] int id) => await Mediator.Send(new GetMovieDetailsByIdQuery { MovieId = id });
 
     [HttpPost("{id}/recommend")]
     public async Task<ActionResult<Result>> Post([FromRoute] int id, [FromBody] RecommendMovieCommand command)

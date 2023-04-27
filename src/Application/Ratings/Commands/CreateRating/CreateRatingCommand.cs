@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Application.Common.Jobs;
+using Application.Common.Models;
 using Application.Common.Models.Cache;
 using Application.Common.Security;
 using Domain.Entities;
@@ -10,13 +11,13 @@ namespace Application.Ratings.Commands.CreateRating;
 
 
 [Authorized]
-public class CreateRatingCommand : IRequest<Unit>
+public class CreateRatingCommand : IRequest<Result>
 {
     public int MovieId { get; init; }
     public int Score { get; init; }
     public string? Comment { get; init; }
 
-    public class CreateRatingCommandHandler : IRequestHandler<CreateRatingCommand, Unit>
+    public class CreateRatingCommandHandler : IRequestHandler<CreateRatingCommand, Result>
     {
         private readonly IDbContext _dbContext;
         private readonly IUserService _userService;
@@ -31,7 +32,7 @@ public class CreateRatingCommand : IRequest<Unit>
             _jobSchedulerService = jobSchedulerService;
         }
 
-        public async Task<Unit> Handle(CreateRatingCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(CreateRatingCommand request, CancellationToken cancellationToken)
         {
             int userId = await _userService.GetUserIdAsync();
 
@@ -49,9 +50,10 @@ public class CreateRatingCommand : IRequest<Unit>
             if (await _dbContext.SaveChangesAsync(cancellationToken) > 0)
             {
                 await _cacheService.RemoveAsync(CachePatterns.Movies.MovieDetails.GetMovieDetailsById(ratingToAdd.MovieId));
+                return Result.Success($"You have successfully rated the movie!");
             }
 
-            return Unit.Value;
+            return Result.Error("There occured an error while rating the movie!");
         }
     }
 }

@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
+using Application.Common.Models;
 using Application.Common.Models.Cache;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -10,11 +11,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Movies.Queries.GetMovieDetailsById;
 
-public class GetMovieDetailsByIdQuery : IRequest<MovieDetailsDto>
+public class GetMovieDetailsByIdQuery : IRequest<DataResult<MovieDetailsDto>>
 {
     public int MovieId { get; init; }
 
-    public class GetMovieDetailsByIdQueryHandler : IRequestHandler<GetMovieDetailsByIdQuery, MovieDetailsDto>
+    public class GetMovieDetailsByIdQueryHandler : IRequestHandler<GetMovieDetailsByIdQuery, DataResult<MovieDetailsDto>>
     {
         private readonly IDbContext _dbContext;
         private readonly IMapper _mapper;
@@ -27,11 +28,11 @@ public class GetMovieDetailsByIdQuery : IRequest<MovieDetailsDto>
             _cacheService = cacheService;
         }
 
-        public async Task<MovieDetailsDto> Handle(GetMovieDetailsByIdQuery request, CancellationToken cancellationToken)
+        public async Task<DataResult<MovieDetailsDto>> Handle(GetMovieDetailsByIdQuery request, CancellationToken cancellationToken)
         {
             if (_cacheService.TryGet<MovieDetailsDto>(
                 key: CachePatterns.Movies.MovieDetails.GetMovieDetailsById(request.MovieId),
-                out var cachedMovie)) return cachedMovie;
+                out var cachedMovie)) return DataResult<MovieDetailsDto>.Success(cachedMovie);
             else
             {
                 var movieDetails = await _dbContext.Set<Movie>().AsNoTracking()
@@ -40,14 +41,14 @@ public class GetMovieDetailsByIdQuery : IRequest<MovieDetailsDto>
                     .ProjectTo<MovieDetailsDto>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
 
-                if (movieDetails is null) throw new NotFoundException("Movie not found");
+                if (movieDetails is null) throw new NotFoundException("Movie not found!");
 
                 await _cacheService.SetValueAsync<MovieDetailsDto>(
                     key: CachePatterns.Movies.MovieDetails.GetMovieDetailsById(request.MovieId),
                     value: movieDetails,
                     duration: TimeSpan.FromDays(7));
 
-                return movieDetails;
+                return DataResult<MovieDetailsDto>.Success(movieDetails);
             }
         }
     }
