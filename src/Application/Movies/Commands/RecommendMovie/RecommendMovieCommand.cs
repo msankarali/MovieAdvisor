@@ -26,6 +26,7 @@ public class RecommendMovieCommand : IRequest<Result>
 
         public async Task<Result> Handle(RecommendMovieCommand request, CancellationToken cancellationToken)
         {
+
             var movieToRecommend = await _dbContext.Set<Movie>().Where(m => m.Id == request.MovieId).SingleAsync();
 
             await _eventBus.PublishAsync(
@@ -36,7 +37,7 @@ public class RecommendMovieCommand : IRequest<Result>
                     cancellationToken: cancellationToken
                 );
 
-            return Result.SuccessOperation();
+            return Result.Success("Email sent successfully!");
         }
     }
 }
