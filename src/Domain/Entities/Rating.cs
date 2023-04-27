@@ -18,7 +18,7 @@ public class Rating : BaseEntity
     private int _score;
     public int Score
     {
-        get { return _score; }
+        get => _score;
         set
         {
             if (value < 0 || value > 10)

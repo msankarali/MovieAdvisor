@@ -27,11 +27,3 @@ public class Result
         return this;
     }
 }
-
-public enum ResultTypes
-{
-    Success,
-    Error,
-    Warning,
-    Information
-}
