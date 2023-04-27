@@ -1,6 +1,7 @@
 using System.Net;
-using System.Text.Json;
 using Application.Common.Exceptions;
+using Application.Common.Models;
+using Newtonsoft.Json;
 
 namespace WebApi.Middlewares;
 
@@ -26,25 +27,30 @@ public class ErrorHandlerMiddleware
             var response = context.Response;
             response.ContentType = "application/json";
 
+            Result result;
+
             switch (error)
             {
-                case ForbiddenAccessException e:
+                case ForbiddenAccessException ex:
                     _logger.LogCritical("");
+                    result = Result.Error(ex.Message);
                     response.StatusCode = (int)HttpStatusCode.Forbidden;
                     break;
-                case NotFoundException or ValidationException:
+                case NotFoundException ex:
+                    result = Result.Error(ex.Message);
                     response.StatusCode = (int)HttpStatusCode.BadRequest;
                     break;
-                case KeyNotFoundException e:
+                case KeyNotFoundException ex:
+                    result = Result.Error(ex.Message);
                     response.StatusCode = (int)HttpStatusCode.NotFound;
                     break;
                 default:
+                    result = Result.Error("Undetected error! Please contact with us.");
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     break;
             }
 
-            var result = JsonSerializer.Serialize(new { message = error?.Message });
-            await response.WriteAsync(result);
+            await response.WriteAsync(JsonConvert.SerializeObject(result));
         }
     }
 }
