@@ -22,6 +22,7 @@ var app = builder.Build();
         await initializer.Seed();
     }
 
+    app.UseMiddleware<RequestResponseLoggerMiddleware>();
     app.UseMiddleware<ErrorHandlerMiddleware>();
 
     if (app.Environment.IsDevelopment())
