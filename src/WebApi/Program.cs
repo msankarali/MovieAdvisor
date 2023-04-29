@@ -22,6 +22,11 @@ var app = builder.Build();
         await initializer.Seed();
     }
 
+    app.UseCors(config =>
+    {
+        config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
+    });
+
     app.UseMiddleware<RequestResponseLoggerMiddleware>();
     app.UseMiddleware<ErrorHandlerMiddleware>();
 
