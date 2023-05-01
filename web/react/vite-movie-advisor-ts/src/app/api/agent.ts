@@ -1,7 +1,14 @@
+import { CreateRatingCommand } from './../models/ratings/CreateRatingCommand';
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { store } from "../stores/store";
-import LoginRequest from "../models/users/loginRequest";
-import RegisterRequest from "../models/users/registerRequest";
+import { LoginRequestFormValues } from "../models/users/loginRequest";
+import DataResponseModel from "../models/dataResponseModel";
+import { PagedModel } from "../models/PagedModel";
+import Movie from "../models/movies/Movie";
+import { Slide, ToastContent, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.min.css';
+import { RegisterRequestFormValues } from "../models/users/registerRequest";
+import { MovieDetails } from "../models/movies/MovieDetails";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -17,6 +24,19 @@ axios.interceptors.response.use(async response => {
     const { data, status } = error.response as AxiosResponse;
 
     console.log(status, data);
+
+    data?.Messages?.forEach(message => {
+        toast.info(message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+            transition: Slide
+        });
+    });
 
     switch (status) {
         case 400:
@@ -45,10 +65,21 @@ const requests = {
 };
 
 const Users = {
-    login: (loginRequest: LoginRequest) => requests.post<string>("/auth/login", loginRequest),
-    register: (registerRequest: RegisterRequest) => requests.post("/auth/register", registerRequest),
+    login: (loginRequest: LoginRequestFormValues) => requests.post<string>("/auth/login", loginRequest),
+    register: (registerRequest: RegisterRequestFormValues) => requests.post("/auth/register", registerRequest),
+}
+
+const Movies = {
+    get: (pageNumber = 1, pageSize = 3) => requests.get<DataResponseModel<PagedModel<Movie>>>(`/movies?pageNumber=${pageNumber}&pageSize=${pageSize}`),
+    getById: (movieId: number) => requests.get<DataResponseModel<MovieDetails>>(`/movies/${movieId}`),
+}
+
+const Ratings = {
+    post: (createRatingCommand: CreateRatingCommand) => requests.post<CreateRatingCommand>('/rating', createRatingCommand),
 }
 
 export const agent = {
-    Users
+    Users,
+    Movies,
+    Ratings
 }
