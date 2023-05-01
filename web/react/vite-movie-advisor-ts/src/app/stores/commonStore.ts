@@ -9,6 +9,7 @@ class CommonStore {
     }
 
     setToken(token: string) {
+        localStorage.setItem('token', token);
         this.token = token;
     }
 }
