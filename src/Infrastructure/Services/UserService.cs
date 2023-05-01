@@ -41,7 +41,7 @@ public class UserService : IUserService
         var isUserRegistered = _dbContext.Set<User>().Where(u => u.Email == email).Any();
         if (isUserRegistered)
         {
-            throw new Exception("User already exists!");
+            throw new NotFoundException("User already exists!");
         }
 
         HashingUtils.CreatePasswordHash(password, out byte[] passwordHash, out var passwordSalt);
