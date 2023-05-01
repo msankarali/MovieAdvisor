@@ -1,6 +1,7 @@
 using System.Net;
 using Application.Common.Exceptions;
 using Application.Common.Models;
+using Domain.Exceptions;
 using Newtonsoft.Json;
 
 namespace WebApi.Middlewares;
@@ -40,7 +41,20 @@ public class ErrorHandlerMiddleware
                     result = Result.Error(ex.Message);
                     response.StatusCode = (int)HttpStatusCode.BadRequest;
                     break;
+                case ValidationException ex:
+                    result = Result.Information(string.Join("\n", ((ValidationException)ex).Errors.SelectMany(kv => kv.Value.Select(v => $"{kv.Key}: {v}"))));
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    break;
+
+                case RatingOutOfBoundsException ex:
+                    result = Result.Information(ex.Message);
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    break;
                 case KeyNotFoundException ex:
+                    result = Result.Error(ex.Message);
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                    break;
+                case NotSupportedException ex:
                     result = Result.Error(ex.Message);
                     response.StatusCode = (int)HttpStatusCode.NotFound;
                     break;
